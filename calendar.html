@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.5.22/vue.min.js"></script>
+    <style>
+        .today {
+            color: #0099ff;
+        }
+        .noNow {
+            color: #ddd;
+        }
+        .selectDay {
+            color: #0099ff;
+            background: rgb(173,216,230);
+        }
+        .table {
+            width: 20rem;
+        }
+        .table div {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+        }
+        table td {
+            width: 2rem;
+            height: 2rem;
+            text-align: center;
+            cursor: pointer;
+        }
+        .month {
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="table">
+        <div>{{yearMonth.year}}</div>
+        <div class="month">
+            <span @click="left">&lt;</span>
+            <span>{{yearMonth.month + 1}}</span>
+            <span @click="right">&gt;</span>
+        </div>
+        <table>
+            <tr>
+                <td v-for="week in weekArr">{{week}}</td>
+            </tr>
+            <tr v-for="(col, i) in 6">
+                <td v-for="day in getDay(monthArr, i)" @click="selectDay(day)"
+                    :class="{'today': getNow(day), 'noNow': getNoNow(day), 'selectDay': getSelect(day)}">
+                    {{day.day}}
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script>
+    let vm = new Vue ({
+        el: '#app',
+        data: {
+            year: '2020',
+            month: '',
+            weekArr: ['一', '二', '三', '四', '五', '六', '日'],
+            nowDate: '',
+            yearMonth: {
+                year: new Date().getFullYear(),
+                month: new Date().getMonth(),
+                day: 1
+            }
+        },
+        computed: {
+            monthArr () {
+                let arr = []
+                let month = new Date(this.yearMonth.year, this.yearMonth.month, 1)
+                let weekDay = month.getDay() || 7
+                let start = month.getTime() - ((weekDay - 1) * 24 * 60 * 60 * 1000)
+                for (let i = 0; i < 42; i++) {
+                    arr.push({
+                        date: new Date(start + i * 24 * 60 * 60 * 1000),
+                        month: new Date(start + i * 24 * 60 * 60 * 1000).getMonth() + 1,
+                        year: new Date(start + i * 24 * 60 * 60 * 1000).getFullYear(),
+                        day: new Date(start + i * 24 * 60 * 60 * 1000).getDate()
+                    })
+                }
+                return arr
+            }
+        },
+        created () {
+            let now = new Date()
+            this.year = now.getFullYear()
+            this.month = now.getMonth()
+        },
+        methods: {
+            getDay (val, i) {
+                return val.slice(i * 7, (i + 1) * 7)
+            },
+            getNow (item) {
+                let now = new Date()
+                if (now.getFullYear() === item.year && now.getMonth() + 1 === item.month && now.getDate() === item.day) {
+                    return true
+                }
+            },
+            getNoNow (item) {
+                if (this.yearMonth.month + 1 !== item.month) {
+                    return true
+                }
+            },
+            left () {
+                let month = new Date(this.yearMonth.year, this.yearMonth.month, 1)
+                month.setMonth(month.getMonth() - 1)
+                this.yearMonth.year = month.getFullYear()
+                this.yearMonth.month = month.getMonth()
+            },
+            right () {
+                let month = new Date(this.yearMonth.year, this.yearMonth.month, 1)
+                month.setMonth(month.getMonth() + 1)
+                this.yearMonth.year = month.getFullYear()
+                this.yearMonth.month = month.getMonth()
+            },
+            selectDay (day) {
+                this.nowDate = day
+                let month = new Date(day.year, day.month - 1 , 1)
+                month.setMonth(month.getMonth())
+                this.yearMonth.year = month.getFullYear()
+                this.yearMonth.month = month.getMonth()
+            },
+            getSelect (day) {
+                if (day.day === this.nowDate.day && day.month === this.nowDate.month) return true
+            }
+        }
+    })
+</script>
+</body>
+</html>
