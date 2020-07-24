@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+          content="width=device-width, user-scalable=no, initial-scale=1.0,
+           maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.5.22/vue.min.js"></script>
     <style>
         .today {
             color: #0099ff;
+            font-weight: bold;
         }
         .noNow {
             color: #ddd;
@@ -34,19 +36,28 @@
             cursor: pointer;
         }
         .month {
-            display: flex;
-            justify-content: space-between;
+            font-size: 0.5rem;
+        }
+        .month span {
+            cursor: pointer;
+            user-select:none;
+        }
+        .yearMonth {
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
 <body>
 <div id="app">
     <div class="table">
-        <div>{{yearMonth.year}}</div>
+        <div class="yearMonth">
+            <span>{{yearMonth.year}}年</span>
+            <span>{{yearMonth.month + 1}}月</span>
+        </div>
         <div class="month">
-            <span @click="left">&lt;</span>
-            <span>{{yearMonth.month + 1}}</span>
-            <span @click="right">&gt;</span>
+            <span @click="page('left')">上个月</span>
+            <span @click="now">今天</span>
+            <span @click="page('right')">下个月</span>
         </div>
         <table>
             <tr>
@@ -103,36 +114,36 @@
             },
             getNow (item) {
                 let now = new Date()
-                if (now.getFullYear() === item.year && now.getMonth() + 1 === item.month && now.getDate() === item.day) {
-                    return true
-                }
+                if (now.getFullYear() === item.year &&
+                    now.getMonth() + 1 === item.month &&
+                    now.getDate() === item.day) return true
             },
             getNoNow (item) {
-                if (this.yearMonth.month + 1 !== item.month) {
-                    return true
-                }
+                if (this.yearMonth.month + 1 !== item.month) return true
             },
-            left () {
+            page (val) {
+                this.nowDate = ''
                 let month = new Date(this.yearMonth.year, this.yearMonth.month, 1)
-                month.setMonth(month.getMonth() - 1)
-                this.yearMonth.year = month.getFullYear()
-                this.yearMonth.month = month.getMonth()
-            },
-            right () {
-                let month = new Date(this.yearMonth.year, this.yearMonth.month, 1)
-                month.setMonth(month.getMonth() + 1)
+                val === 'left' ? month.setMonth(month.getMonth() - 1) : month.setMonth(month.getMonth() + 1)
                 this.yearMonth.year = month.getFullYear()
                 this.yearMonth.month = month.getMonth()
             },
             selectDay (day) {
                 this.nowDate = day
-                let month = new Date(day.year, day.month - 1 , 1)
+                let month = new Date(day.year, day.month - 1 , day.day)
                 month.setMonth(month.getMonth())
                 this.yearMonth.year = month.getFullYear()
                 this.yearMonth.month = month.getMonth()
+                this.yearMonth.day = month.getDate()
             },
             getSelect (day) {
                 if (day.day === this.nowDate.day && day.month === this.nowDate.month) return true
+            },
+            now () {
+                let now = new Date()
+                this.nowDate = ''
+                this.yearMonth.year = now.getFullYear()
+                this.yearMonth.month = now.getMonth()
             }
         }
     })
